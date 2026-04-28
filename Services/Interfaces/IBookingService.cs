@@ -12,6 +12,8 @@ namespace RobustBookingSystem.Services.Interfaces
         Task<List<BookingDto>> GetMyBookingsAsync(int userId, CancellationToken ct = default);
         Task<List<BookingDto>> GetAllAsync(CancellationToken ct = default);
         Task<BookingDto> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<BookingDto> UpdateAsync(int userId, int bookingId, UpdateBookingCommand command, CancellationToken ct = default);
+        Task DeleteAsync(int userId, int bookingId, byte[] rowVersion, CancellationToken ct = default);
 
     }
 }

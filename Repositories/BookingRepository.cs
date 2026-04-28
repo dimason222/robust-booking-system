@@ -60,5 +60,22 @@ namespace RobustBookingSystem.Repositories
             _context.Bookings.Update(booking);
             await _context.SaveChangesAsync(ct);
         }
+
+        public async Task<bool> HasConflictAsync(int resourceId, DateTime startAtUtc, DateTime endAtUtc, int excludeBookingId, CancellationToken ct = default)
+        {
+            return await _context.Bookings.AnyAsync(b =>
+                b.Id != excludeBookingId &&
+                b.ResourceId == resourceId &&
+                b.Status == BookingStatus.Active &&
+                startAtUtc < b.EndAtUtc &&
+                endAtUtc > b.StartAtUtc,
+                ct);
+        }
+
+        public async Task DeleteAsync(Booking booking, CancellationToken ct = default)
+        {
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync(ct);
+        }
     }
 }

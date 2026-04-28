@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RobustBookingSystem.Dto.Commands;
 using RobustBookingSystem.Dto.Responses;
 using RobustBookingSystem.Services.Interfaces;
+using System.Security.Claims;
 
 namespace RobustBookingSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _bookingService;
@@ -17,6 +20,7 @@ namespace RobustBookingSystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<BookingDto>>> GetAll(CancellationToken ct)
         {
             var result = await _bookingService.GetAllAsync(ct);
@@ -24,15 +28,18 @@ namespace RobustBookingSystem.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<BookingDto>> GetById(int id, CancellationToken ct)
         {
             var result = await _bookingService.GetByIdAsync(id, ct);
             return Ok(result);
         }
 
-        [HttpGet("user/{userId:int}")]
-        public async Task<ActionResult<List<BookingDto>>> GetByUser(int userId, CancellationToken ct)
+        [HttpGet("my")]
+        public async Task<ActionResult<List<BookingDto>>> GetMy(CancellationToken ct)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
             var result = await _bookingService.GetMyBookingsAsync(userId, ct);
             return Ok(result);
         }
@@ -40,16 +47,36 @@ namespace RobustBookingSystem.Controllers
         [HttpPost]
         public async Task<ActionResult<BookingDto>> Create([FromBody] CreateBookingCommand command, CancellationToken ct)
         {
-            var result = await _bookingService.CreateAsync(command.UserId, command, ct);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            var result = await _bookingService.CreateAsync(userId, command, ct);
             return Ok(result);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<BookingDto>> Update(int id, [FromBody] UpdateBookingCommand command, CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            var result = await _bookingService.UpdateAsync(userId, id, command, ct);
+
+            return Ok(result);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id, [FromBody] DeleteBookingCommand command, CancellationToken ct)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            await _bookingService.DeleteAsync(userId, id, command.RowVersion, ct);
+
+            return NoContent();
         }
 
         [HttpPost("cancel")]
         public async Task<ActionResult<BookingDto>> Cancel([FromBody] CancelBookingCommand command, CancellationToken ct)
         {
-            // временно без JWT можно просто использовать userId из тела команды,
-            // но если у тебя его там нет, пока поставь тестовый вариант:
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             var result = await _bookingService.CancelAsync(userId, command, ct);
             return Ok(result);

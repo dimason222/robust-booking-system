@@ -10,7 +10,8 @@ namespace RobustBookingSystem.Repositories.Interfaces
         Task<bool> HasConflictAsync(int resourceId, DateTime startAtUtc, DateTime endAtUtc, CancellationToken ct = default);
         Task AddAsync(Booking booking, CancellationToken ct = default);
         Task UpdateAsync(Booking booking, CancellationToken ct = default);
-
         Task<List<Booking>> GetAllAsync(CancellationToken ct = default);
+        Task<bool> HasConflictAsync(int resourceId, DateTime startAtUtc, DateTime endAtUtc, int excludeBookingId, CancellationToken ct = default);
+        Task DeleteAsync(Booking booking, CancellationToken ct = default);
     }
 }
