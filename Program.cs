@@ -135,6 +135,8 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 app.MapControllers();
 
 if (!app.Environment.IsProduction())
