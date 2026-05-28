@@ -29,6 +29,12 @@ builder.Host.UseSerilog((context, services, configuration) =>
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .WriteTo.Console();
+
+    var seqUrl = Environment.GetEnvironmentVariable("SEQ_URL");
+    if (!string.IsNullOrWhiteSpace(seqUrl))
+    {
+        configuration.WriteTo.Seq(seqUrl);
+    }
 });
 
 // Add services to the container.

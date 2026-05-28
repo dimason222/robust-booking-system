@@ -15,6 +15,7 @@ services:
       Jwt__Issuer: "${JWT_ISSUER}"
       Jwt__Audience: "${JWT_AUDIENCE}"
       Jwt__Key: "${JWT_KEY}"
+      SEQ_URL: "http://seq:80"
     depends_on:
       mysql:
         condition: service_healthy
