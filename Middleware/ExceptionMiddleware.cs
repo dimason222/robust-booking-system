@@ -31,6 +31,10 @@ namespace RobustBookingSystem.Middleware
             {
                 await WriteErrorAsync(context, HttpStatusCode.BadRequest, ex.Message);
             }
+            catch (BookingConflictException ex) 
+            {
+                await WriteErrorAsync(context, HttpStatusCode.Conflict, ex.Message);
+            }
             catch (ConflictException ex)
             {
                 await WriteErrorAsync(context, HttpStatusCode.Conflict, ex.Message);
